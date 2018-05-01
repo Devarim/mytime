@@ -95,9 +95,6 @@ export class Task extends Store {
 
     save(status) {
         if(status) this.status = status;
-        if (this.isStatus(Task._WAITING)) {
-            this.intervals.push({ init: moment(), end: null });
-        } 
         if (this.isStatus(Task._PLAYED)) {
             this._pauseAllOthers();
         }
@@ -112,6 +109,7 @@ export class Task extends Store {
     }
 
     pause() {
+        if (this.last_interval && !this.last_interval.end) return null;
         this.intervals.push({ init: moment(), end: null });
         this.status = Task._WAITING
         this.save();
