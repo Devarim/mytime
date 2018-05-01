@@ -4,7 +4,8 @@ import axios from 'axios'
 import App from './App'
 import router from './router'
 import store from './store'
-import {Store} from './store/Store.js'
+import { Store } from './models/Store.js'
+import mixin from './mixin.js'
 
 Store._store = store
 
@@ -13,6 +14,9 @@ Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 // Vue.$electron.window
 /* eslint-disable no-new */
+
+Vue.mixin(mixin);
+
 new Vue({
   components: { App },
   router,

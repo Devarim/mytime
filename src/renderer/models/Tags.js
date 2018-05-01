@@ -1,4 +1,4 @@
-import { Store } from '../store/Store'
+import { Store } from './Store'
 
 export class Tags extends Store {
 

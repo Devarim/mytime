@@ -10,6 +10,12 @@
   }
 </script>
 
+<style lang="scss">
+$fa-font-path:"../../node_modules/font-awesome/fonts";
+@import "../../node_modules/font-awesome/scss/font-awesome";
+</style>
+
+
 <style>
   /* CSS */
 * {
@@ -45,4 +51,6 @@ button.default {
     margin-top: 10px;
     cursor: pointer;
 }
+
+.text-center { text-align: center; }
 </style>

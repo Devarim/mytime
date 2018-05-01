@@ -1,9 +1,22 @@
 <template>
     <div>
-        <input class="" type="time" placeholder='Initial date' v-model="task.init_time" @click="task.stopAutoInitDateTime()"> <br> 
-        <textarea id="textarea-name" rows="1" style="height:1em;" v-model="task.name">
+
+        <div class="time">
+            <div class="init_time">
+                <input class="" type="time" placeholder='Initial date' v-model="task.init_time" @click="task.stopAutoInitDateTime()">
+            </div>
+            <div class="id_task">
+                <input class="text-center" type="text" placeholder='Title' v-model="task.title" @click="task.stopAutoInitDateTime()" @keypress.enter.ctrl.prevent="save">
+            </div>
+            <div class="end_time">
+                <span class='btn' @click="save(STATUS_PLAYED)"><fa name="play"></fa></span>
+                <span class='btn' @click="save(STATUS_WAITING)"><fa name="plus"></fa></span>
+                <span class='btn' @click="clear()"><fa name="times"></fa></span>
+            </div>
+        </div>
+        <textarea @click="task.stopAutoInitDateTime()" id="textarea-name" rows="1" style="height:1em;" v-model="task.name" @keypress.enter.ctrl.prevent="save(STATUS_PLAYED)" @keyup.esc.delete="clear">
         </textarea>
-        <button @click="save()">&#10011;</button>
+
     </div>
 </template>
 
@@ -12,19 +25,29 @@ import {autoresize} from './../../helpers.js';
 import {Task} from '../../models/Task.js'
 export default {
     name: 'FormTask',
-    // props: ['task'],
     data : () => {
         return {
             task : new Task()
         }
     },
-
+    computed : {
+        STATUS_PLAYED () {
+            return Task._PLAYED
+        },
+        STATUS_WAITING () {
+            return Task._WAITING
+        }
+    },
     methods : {
-        save() {
-            this.task.save();
+        save(status) {
+            this.task.save(status);
+            this.clear();
+        },
+        clear(key) {
+            if(key && key.code == 'Backspace') return "";
             this.task = null
             this.task = new Task();
-            this.task.setAutoInitDateTime();
+            this.task.setAutoInitDateTime();            
         }
     },
     created() {
@@ -36,4 +59,33 @@ export default {
 
 }
 </script>
+
+<style scoped>
+input {
+    background: none;
+}
+.init_time, .id_task, .end_time {
+    display: inline-block;
+    width: 32.3%;
+    vertical-align: middle;
+    line-height: 32px;
+    padding: 0px 10px;
+}
+.id_task {
+    text-align: center;
+    font-size: 9px;
+}
+.end_time {
+    text-align: right;
+    float: right;
+}
+.active .end_time {
+    color: #F44;
+}
+.time {
+    background: rgba(0,0,0,0.2);
+    margin: -10px -10px 10px -10px;
+}
+</style>
+
 

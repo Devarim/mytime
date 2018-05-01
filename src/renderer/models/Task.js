@@ -1,4 +1,4 @@
-import {Store} from '../store/Store'
+import {Store} from './Store.js'
 import { setInterval } from 'timers';
 
 const dateformat = 'DD/MM/YY HH:mm'
@@ -7,6 +7,7 @@ const timeformat = 'HH:mm'
 export class Task extends Store {
 
     id = ''
+    title = ''
     name = ''
     date = {
         init : '',
@@ -14,11 +15,26 @@ export class Task extends Store {
     }
     status = ''
 
+    intervals_ = []
+
     _autoSetInitTime_interval = null
     _autoSetEndTime_interval = null
 
-    static _INITIAL = 1
+    // static _INITIAL = 1
     static _FINALIZED = 2
+    // static _PAUSED = 3
+    static _PLAYED = 4
+    static _WAITING = 5
+
+    get intervals() {
+        return this.intervals_;
+    }
+    set intervals(value) {
+        this.intervals_ = [];
+        value.forEach(element => {
+            this.intervals_.push({...element})
+        });
+    }
 
     get init_time() {
         return moment(this.date.init).format(timeformat);
@@ -43,18 +59,26 @@ export class Task extends Store {
         })
     }
 
+    get last_interval() {
+        return this.intervals[this.intervals.length - 1];
+    }
+    set last_interval(value) {
+        this.intervals[this.intervals.length - 1] = value;
+    }
+
 
     constructor(data) {
         super()
         if (data) {
             this.id = data.id
+            this.title = data.title
             this.name = data.name
             this.date.init = data.date.init
             this.date.end = data.date.end
             this.status = data.status
+            this.intervals = [...data.intervals_]
         } else {
-            this.id = moment().format('x');
-            this.status = Task._INITIAL
+            // this.id = moment().format('x');
         }
     }
 
@@ -69,36 +93,47 @@ export class Task extends Store {
     }
 
 
-    setAutoEndDateTime() {
-        this.date.end = moment()
-        if (!this._autoSetEndTime_interval)
-            this._autoSetEndTime_interval = window.setInterval(() => { this.setAutoEndDateTime() }, 1000);
-    }
-
-    stopAutoEndDateTime() {
-        window.clearInterval(this._autoSetEndTime_interval)
-    }
-
-    save() {
-        let dados = this.serialize();
-        console.log("Adicionando");
-        console.log(dados);
-        this.commit('ADD_TASK', dados );
+    save(status) {
+        if(status) this.status = status;
+        if (this.isStatus(Task._WAITING)) {
+            this.intervals.push({ init: moment(), end: null });
+        } 
+        if (this.isStatus(Task._PLAYED)) {
+            this._pauseAllOthers();
+        }
+        let dataObject = this.serialize();
+        this.dispatch('ADD_TASK', dataObject );
         return true;
     }
 
     finalize() {
         this.status = Task._FINALIZED
-        this.stopAutoEndDateTime()
         this.save();
     }
 
-    isInitial() {
-        return this.status == Task._INITIAL;
+    pause() {
+        this.intervals.push({ init: moment(), end: null });
+        this.status = Task._WAITING
+        this.save();
+    }
+    _pauseAllOthers() {
+        this.dispatch('PAUSE_ALL');
     }
 
-    isFinalized() {
-        return this.status == Task._FINALIZED;
+    start() {
+        this._pauseAllOthers();
+        if (this.last_interval) this.last_interval.end = moment();
+        this.status = Task._PLAYED
+        this.save();
+    }
+
+    isStatus(status) {
+        return this.status == status;
+    }
+
+    static load() {
+        let task = new Task();
+        task.dispatch('LOAD_TASKS');
     }
 
 

@@ -1,18 +1,25 @@
 <template>
-    <li :class="{ active: isInitial, finalized : isFinalized }"> 
+    <li :class="{ active: isPlayed, finalized : isFinalized, waiting : isWaiting }"> 
         <div class="time">
-            <div class="init_time">{{objTask.init_time}} </div>
-            <div class="id_task">{{objTask.id}} </div>
+            <div class="init_time">#{{task.id}} - {{task.init_time}} </div>
+            <div class="id_task">{{task.title}} </div>
             <div class="end_time">
-                <span class='btn' v-if="isInitial" @click="objTask.finalize()">
-                    <span class="ft-red">&#10060;</span> {{objTask.end_time}}
+                <span class='btn' v-if="isWaiting" @click="edit(task)">
+                    <span class="ft-red"><fa name="edit"></fa></span> 
                 </span>
-                <span v-else>
-                    {{objTask.end_time}}
+                <span class='btn' v-if="isWaiting" @click="task.start()">
+                    <span class="ft-red"><fa name="play"></fa></span> 
                 </span>
+                <span class='btn' v-if="isPlayed" @click="task.pause()">
+                    <span class="ft-red"><fa name="pause"></fa></span>
+                </span>
+                <span class='btn' v-if="isPlayed || isWaiting" @click="task.finalize()">
+                    <span class="ft-red"><fa name="times"></fa></span> 
+                </span>
+                <!-- {{task.end_time}} -->
             </div>
         </div>
-        {{objTask.name}} <br>
+        <pre>{{task.name}}</pre>
     </li>
 </template>
 
@@ -30,11 +37,14 @@ export default {
         }
     },
     computed : {
-        isInitial() {
-            return this.objTask.isInitial();
+        isPlayed() {
+            return this.task.isStatus(Task._PLAYED);
         },
         isFinalized() {
-            return this.objTask.isFinalized();
+            return this.task.isStatus(Task._FINALIZED);
+        },
+        isWaiting() {
+            return this.task.isStatus(Task._WAITING);
         }
     },
     methods : {
@@ -44,18 +54,20 @@ export default {
         },
     },
     created() {
-        this.objTask = new Task(this.task);
-        if(this.objTask.isInitial()) {
-            this.objTask.setAutoEndDateTime()
-        }
+        // this.task = new Task({ ...this.task });
+        // if(this.task.isStatus(Task._PLAYED)) {
+        //     // this.task.setAutoEndDateTime()
+        // }
     }
 }
 </script>
 
 <style scoped>
 .active {
-    opacity: 1 !important;
     background: rgb(202, 231, 184) !important;
+}
+.waiting {
+    background: rgb(245, 213, 177) !important;
 }
 .init_time, .id_task, .end_time {
     display: inline-block;
@@ -66,7 +78,6 @@ export default {
 }
 .id_task {
     text-align: center;
-    font-size: 9px;
 }
 .end_time {
     text-align: right;

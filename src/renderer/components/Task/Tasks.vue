@@ -1,15 +1,16 @@
 <template>
     <div>
         <ul class="lista">
-            {{date}}
             <li class="form noOpacity">
                 <task-form></task-form>               
             </li>
-
         </ul>
-        <transition-group name="list-complete" tag="ul" class="lista">
+        <transition-list>
+            <li class="list-complete-item noOpacity" :key="'fileds'">
+                <input type="checkbox" v-model="showFinalized"> Show finalized?
+            </li>
             <task-item v-for="task in tasks" :key="task.id" :task='task' class="list-complete-item"></task-item>
-        </transition-group>
+        </transition-list>
     </div>
 </template>
 
@@ -20,6 +21,7 @@ import {mapGetters} from 'vuex'
 
 import taskform from './Form.vue';
 import taskitem from './Task.vue';
+import TransitionList from '../helpers/TransitionList.vue';
 
 import {Task} from '../../models/Task.js'
 import {Tags} from '../../models/Tags.js'
@@ -29,30 +31,49 @@ export default {
     name: 'tasks',
     data() {
         return {
+            showFinalized : false
         }
     },
+    props : [ 'date' ],
     computed : {
         ...mapGetters({
-            tasks : 'tasks_order',
-            // tasks : 'tasks',
-            date : 'date',
+            tasks_order : 'tasks_order',
         }),
+        tasks() {
+            if(!this.tasks_order.length > 0) return []
+            
+            let tasks = [];
+            this.tasks_order.forEach((item) => {
+                let task = new Task({...item});
+                if(task.isStatus(Task._FINALIZED)) {
+                    if(this.showFinalized) {
+                        tasks.push(task);
+                    }
+                } else {
+                    tasks.push(task);
+                }
+            });
+            return tasks 
+        }
+    },
+    created() {
+        Task.load();
     },
     mounted() {
     },
     components : {
         taskForm: taskform,
-        taskItem: taskitem
+        taskItem: taskitem,
+        TransitionList
     }
 }
 </script>
 <style scoped>
 
 ul.lista {
-    margin: 0px;
+    margin: 0px 10px;
     margin-top: 0px;
     padding: 5px;
-    width: 50%;
 }
 .lista li {
     background: #FFF;
@@ -60,14 +81,11 @@ ul.lista {
     box-shadow: 0px 0px 5px 2px #000;
     list-style: none;
     padding: 10px ;
-    margin: 5px 0px;
+    margin: 15px 0px;
     border-radius: 3px;
-    opacity: 0.6;
-    /* transition: opacity 1s, box-shadow 1s; */
 }
 .lista li:hover, .lista li.noOpacity {
     box-shadow: 0px 0px 20px 2px #000;
-    opacity: 1;
 }
 
 
@@ -75,19 +93,6 @@ ul.lista {
     color: #666;
 }
 
-
-.list-complete-item {
-  transition: all 0.3s;
-  display: inline-block;
-  width: 100%;
-}
-.list-complete-enter, .list-complete-leave-to{
-  opacity: 0;
-  transform: translateY(5px);
-}
-.list-complete-leave-active {
-  position: absolute;
-}
 
 </style>
 
