@@ -1,5 +1,5 @@
 
-import fa from './components/helpers/Fa.vue'
+import fa from './components/Helpers/Fa.vue'
 
 import moment from 'moment'
 

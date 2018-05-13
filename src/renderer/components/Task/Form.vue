@@ -47,11 +47,11 @@ export default {
             if(key && key.code == 'Backspace') return "";
             this.task = null
             this.task = new Task();
-            this.task.setAutoInitDateTime();            
+            // this.task.setAutoInitDateTime();            
         }
     },
     created() {
-        this.task.setAutoInitDateTime();
+        // this.task.setAutoInitDateTime();
     },
     mounted() {
         autoresize('textarea-name').init();

@@ -21,7 +21,7 @@ import {mapGetters} from 'vuex'
 
 import taskform from './Form.vue';
 import taskitem from './Task.vue';
-import TransitionList from '../helpers/TransitionList.vue';
+import TransitionList from '../Helpers/TransitionList.vue';
 
 import {Task} from '../../models/Task.js'
 import {Tags} from '../../models/Tags.js'
@@ -40,6 +40,7 @@ export default {
             tasks_order : 'tasks_order',
         }),
         tasks() {
+            if(this.tasks_order == null ) return []
             if(!this.tasks_order.length > 0) return []
             
             let tasks = [];

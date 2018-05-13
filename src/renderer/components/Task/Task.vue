@@ -54,10 +54,6 @@ export default {
         },
     },
     created() {
-        // this.task = new Task({ ...this.task });
-        // if(this.task.isStatus(Task._PLAYED)) {
-        //     // this.task.setAutoEndDateTime()
-        // }
     }
 }
 </script>
