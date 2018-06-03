@@ -1,8 +1,7 @@
 import {Store} from './Store.js'
 import { setInterval } from 'timers';
+import { TaskTime } from './TaskTime.js';
 
-const dateformat = 'DD/MM/YY HH:mm'
-const timeformat = 'HH:mm'
 
 export class Task extends Store {
 
@@ -10,12 +9,7 @@ export class Task extends Store {
     title = ''
     name = ''
     date_ = []
-    status = ''
-
-    // intervals_ = []
-
-    // _autoSetInitTime_interval = null
-    // _autoSetEndTime_interval = null
+    status_ = ''
 
     // static _INITIAL = 1
     // static _PAUSED = 3
@@ -24,53 +18,33 @@ export class Task extends Store {
     static _WAITING = 5
     
     get first_date() {
-        return this.date_[0];
+        if (this.date_[0])
+            return this.date_[0];
+        else 
+            return new TaskTime(moment(),""); 
     }
 
     get last_date() {
-        return this.date_[this.date_.length];
+        if (this.date_[this.date_.length - 1])
+            return this.date_[this.date_.length - 1];
+        else 
+            return new TaskTime(moment(), ""); 
     }
 
-    // get intervals() {
-    //     return this.intervals_;
-    // }
-    // set intervals(value) {
-    //     this.intervals_ = [];
-    //     value.forEach(element => {
-    //         this.intervals_.push({...element})
-    //     });
-    // }
+    set status(value) {
+        this.status_ = value;
+        if (this.isStatus(Task._FINALIZED)) { this.finalize(); }
+        if (this.isStatus(Task._PLAYED)) { this.start(); }
+        if (this.isStatus(Task._WAITING)) { this.pause(); }
+    }
 
-    // get init_time() {
-    //     return moment(this.date[0].init).format(timeformat);
-    // }
-    // set init_time(value) {
-    //     var hour = moment(value, timeformat);
-    //     this.date.init.set({
-    //         'hour': hour.get('hour'),
-    //         'minute': hour.get('minute'),
-    //         'second': hour.get('second')
-    //     })
-    // }
-    // get end_time() {
-    //     return moment(this.date.end).format(timeformat);
-    // }
-    // set end_time(value) {
-    //     var hour = moment(value, timeformat);
-    //     this.date.end.set({
-    //         'hour': hour.get('hour'),
-    //         'minute': hour.get('minute'),
-    //         'second': hour.get('second')
-    //     })
-    // }
-
-    // get last_interval() {
-    //     return this.intervals[this.intervals.length - 1];
-    // }
-    // set last_interval(value) {
-    //     this.intervals[this.intervals.length - 1] = value;
-    // }
-
+    get status() {
+        return this.status_;
+    }
+    
+    addDate(date) {
+        this.date_.push(date);
+    }
 
     constructor(data) {
         super()
@@ -78,26 +52,17 @@ export class Task extends Store {
             this.id = data.id
             this.title = data.title
             this.name = data.name
-            if(data.date_)
-                this.date_ = [...data.date_]
-            // this.date.init = data.date.init
-            // this.date.end = data.date.end
-            this.status = data.status
-            // this.intervals = [...data.intervals_]
+            if(data.date_) {
+                data.date_.forEach(element => {
+                    this.addDate(new TaskTime(element.init_, element.end_));
+                });
+            }
+            this.status_ = data.status_
         } else {
-            // this.id = moment().format('x');
+            
         }
     }
 
-    // setAutoInitDateTime() {
-    //     this.date.init = moment()
-    //     if (!this._autoSetInitTime_interval)
-    //         this._autoSetInitTime_interval = window.setInterval(()=> { this.setAutoInitDateTime() }, 1000);
-    // }
-
-    // stopAutoInitDateTime() {
-    //     window.clearInterval(this._autoSetInitTime_interval)
-    // }
     
     
     static load() {
@@ -106,44 +71,34 @@ export class Task extends Store {
     }
     
     save(status) {
-        if(status) this.status = status;
-        if (this.isStatus(Task._PLAYED)) {
-            this._pauseAllOthers();
-            this.actual_date.init = moment();
-        }
+        this.status = status;
+
         let dataObject = this.serialize();
+        console.log(dataObject);
         this.dispatch('ADD_TASK', dataObject );
         return true;
     }
 
     start() {
-        this._pauseAllOthers()
-        this.status = Task._PLAYED
-        this.date.push({})
-        this.save();
+        console.log('START');
+        this.addDate(new TaskTime(moment(), null));
     }
 
     finalize() {
-        this.status = Task._FINALIZED
-        this.save();
+        console.log('FINALIZED');
+        if (this.date_[this.date_.length - 1])
+            this.date_[this.date_.length - 1].end = moment();
     }
 
     pause() {
-        if (this.last_interval && !this.last_interval.end) return null;
-        this.intervals.push({ init: moment(), end: null });
-        this.status = Task._WAITING
-        this.save();
-    }
-    _pauseAllOthers() {
-        this.dispatch('PAUSE_ALL');
+        console.log('PAUSE');
+        if (this.date_[this.date_.length - 1])
+            this.date_[this.date_.length - 1].end = moment();
     }
 
 
     isStatus(status) {
         return this.status == status;
     }
-
-
-
 
 }

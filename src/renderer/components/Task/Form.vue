@@ -3,10 +3,10 @@
 
         <div class="time">
             <div class="init_time">
-                <input class="" type="time" placeholder='Initial date' v-model="task.init_time" @click="task.stopAutoInitDateTime()">
+                <input class="" type="time" placeholder='Initial date' v-model="task.init_time" >
             </div>
             <div class="id_task">
-                <input class="text-center" type="text" placeholder='Title' v-model="task.title" @click="task.stopAutoInitDateTime()" @keypress.enter.ctrl.prevent="save">
+                <input class="text-center" type="text" placeholder='Title' v-model="task.title" @keypress.enter.ctrl.prevent="save">
             </div>
             <div class="end_time">
                 <span class='btn' @click="save(STATUS_PLAYED)"><fa name="play"></fa></span>
@@ -14,7 +14,7 @@
                 <span class='btn' @click="clear()"><fa name="times"></fa></span>
             </div>
         </div>
-        <textarea @click="task.stopAutoInitDateTime()" id="textarea-name" rows="1" style="height:1em;" v-model="task.name" @keypress.enter.ctrl.prevent="save(STATUS_PLAYED)" @keyup.esc.delete="clear">
+        <textarea id="textarea-name" rows="1" style="height:1em;" v-model="task.name" @keypress.enter.ctrl.prevent="save(STATUS_PLAYED)" @keyup.esc.delete="clear">
         </textarea>
 
     </div>

@@ -1,19 +1,19 @@
 <template>
     <li :class="{ active: isPlayed, finalized : isFinalized, waiting : isWaiting }"> 
         <div class="time">
-            <div class="init_time">#{{task.id}} - {{task.init_time}} </div>
+            <div class="init_time">#{{task.id}} - {{task.first_date.init_format_time}} </div>
             <div class="id_task">{{task.title}} </div>
             <div class="end_time">
                 <span class='btn' v-if="isWaiting" @click="edit(task)">
                     <span class="ft-red"><fa name="edit"></fa></span> 
                 </span>
-                <span class='btn' v-if="isWaiting" @click="task.start()">
+                <span class='btn' v-if="isWaiting" @click="save(status._PLAYED)">
                     <span class="ft-red"><fa name="play"></fa></span> 
                 </span>
-                <span class='btn' v-if="isPlayed" @click="task.pause()">
+                <span class='btn' v-if="isPlayed" @click="save(status._WAITING)">
                     <span class="ft-red"><fa name="pause"></fa></span>
                 </span>
-                <span class='btn' v-if="isPlayed || isWaiting" @click="task.finalize()">
+                <span class='btn' v-if="isPlayed || isWaiting" @click="save(status._FINALIZED)">
                     <span class="ft-red"><fa name="times"></fa></span> 
                 </span>
                 <!-- {{task.end_time}} -->
@@ -33,7 +33,12 @@ export default {
     props: ['task'],
     data () {
         return {
-            objTask : {}
+            objTask : {},
+            status : {
+                _PLAYED : Task._PLAYED,
+                _FINALIZED  : Task._FINALIZED,
+                _WAITING : Task._WAITING
+            }
         }
     },
     computed : {
@@ -45,13 +50,16 @@ export default {
         },
         isWaiting() {
             return this.task.isStatus(Task._WAITING);
-        }
+        },
     },
     methods : {
         endTask(task) {
             var task = new Task(task);
             task.finalize();
         },
+        save(status) {
+            this.task.save(status);
+        }
     },
     created() {
     }

@@ -11,13 +11,13 @@ const getters = {
     tasks: state => state.tasks,
     tasks_order: state => {
         if ([...state.tasks].lenght > 0) return [];
-
+        
         let orderStatus = [Task._PLAYED, Task._WAITING, Task._FINALIZED ];
 
         let sorted = [...state.tasks].sort((a, b) => {
             if(a.status == b.status) {
-                var timestamp_a = parseInt(moment(a.date.init).format('x'));
-                var timestamp_b = parseInt(moment(b.date.init).format('x'));
+                var timestamp_a = parseInt(moment(a.last_date.init).format('x'));
+                var timestamp_b = parseInt(moment(b.last_date.init).format('x'));
                 if (timestamp_a > timestamp_b) return -1
                 if (timestamp_a < timestamp_b) return 1
                 return 0
@@ -49,7 +49,7 @@ const mutations = {
     SET_TASKS( state, tasks) {
         state.tasks.splice(0)
         tasks.forEach(task => {
-            state.tasks.push(task)
+            state.tasks.push(new Task(task))
         });
     },
     INIT_TASK(state, value) {
@@ -65,14 +65,14 @@ const mutations = {
 }
 
 const actions = {
-    PAUSE_ALL( {state}, payload ) {
-        state.tasks.find(item => {
-            if (item.status == Task._PLAYED) {
-                let task = new Task(item);
-                task.pause();
-            }
-        });
-    },
+    // PAUSE_ALL( {state}, payload ) {
+    //     state.tasks.find(item => {
+    //         if (item.status == Task._PLAYED) {
+    //             let task = new Task(item);
+    //             task.pause();
+    //         }
+    //     });
+    // },
     async ADD_TASK({ state, commit, dispatch }, payload) {
         payload = { ...payload, type: 'task' }
         if (!payload.id) { 
@@ -81,6 +81,7 @@ const actions = {
         }
         else {
             await db.update({ id: payload.id, type: 'task' }, payload);
+            db.persistence.compactDatafile()
         }
 
         await dispatch('LOAD_TASKS');
