@@ -1,6 +1,6 @@
 # mytime
 
-> Gerenciado de tempo e tarefas
+> Project to order personal tasks
 
 #### Build Setup
 
